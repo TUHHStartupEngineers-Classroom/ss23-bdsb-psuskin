@@ -5,7 +5,7 @@ author: "Philip Suskin"
 
 # Solution
 
-```{r plot, fig.width=10, fig.height=7}
+```{r plot, fig.width=12, fig.height=8}
 
 # Load libraries
 library(tidyverse)
