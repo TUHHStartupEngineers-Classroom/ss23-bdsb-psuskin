@@ -1,10 +1,17 @@
 [
   {
-    "objectID": "content/03_other/06_links.html",
-    "href": "content/03_other/06_links.html",
-    "title": "Links",
+    "objectID": "content/01_journal/01_tidyverse.html",
+    "href": "content/01_journal/01_tidyverse.html",
+    "title": "Tidyverse",
     "section": "",
-    "text": "R is a free open-source programming language that can be used for statistical analysis, data-simulation, graphing, and lots of other stuff. Another free program is R-studio, that provides a nice graphic interface for R. Download R first, then download R-studio. Both can run on PCs, Macs or Linux. Students will be learning R in the stats labs using the lab manual .\n\n\n\n\nGoogle is great, Google your problem\nStackoverflow is great, google will often take you there because someone has already asked your question, and someone else has answered, usually many people have answered your question many ways."
+    "text": "1 Solution\n\n# Load libraries\nlibrary(tidyverse)\n\n#> -- Attaching core tidyverse packages ------------------------ tidyverse 2.0.0 --\n#> v dplyr     1.1.2     v readr     2.1.4\n#> v forcats   1.0.0     v stringr   1.5.0\n#> v ggplot2   3.4.2     v tibble    3.2.1\n#> v lubridate 1.9.2     v tidyr     1.3.0\n#> v purrr     1.0.1     -- Conflicts ------------------------------------------ tidyverse_conflicts() --\n#> x dplyr::filter() masks stats::filter()\n#> x dplyr::lag()    masks stats::lag()\n#> i Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors\n\nlibrary(readxl)\nlibrary(lubridate)\n\n# Load files\nbikes_tbl      <- read_excel(\"../../ds_data/01_bike_sales/01_raw_data/bikes.xlsx\")\norderlines_tbl <- read_excel(\"../../ds_data/01_bike_sales/01_raw_data/orderlines.xlsx\")\n\n#> New names:\n\nbikeshops_tbl  <- read_excel(\"../../ds_data/01_bike_sales/01_raw_data/bikeshops.xlsx\")\n\n# Get joined table\nleft_join(orderlines_tbl, bikes_tbl, by = c(\"product.id\" = \"bike.id\"))\n\n\n\n  \n\n\nbike_orderlines_joined_tbl <- orderlines_tbl %>%\n  left_join(bikes_tbl, by = c(\"product.id\" = \"bike.id\")) %>%\n  left_join(bikeshops_tbl, by = c(\"customer.id\" = \"bikeshop.id\"))\nbike_orderlines_wrangled_tbl <- bike_orderlines_joined_tbl %>%\n  mutate(total.price = price * quantity)\n\n# Split location into city and state\nbike_orderlines_wrangled_tbl$city <- \"\"\nbike_orderlines_wrangled_tbl$state <- \"\"\nfor (i in 1:nrow(bike_orderlines_wrangled_tbl)) {\n  location <- strsplit(bike_orderlines_wrangled_tbl$location[i], \", \")[[1]]\n  bike_orderlines_wrangled_tbl$city[i] <- location[1]\n  bike_orderlines_wrangled_tbl$state[i] <- location[2]\n}\nbike_orderlines_wrangled_tbl <- bike_orderlines_wrangled_tbl[, !colnames(bike_orderlines_wrangled_tbl) %in% \"location\"]\n\n# Plot by state and year\nsales_by_year_state_tbl <- bike_orderlines_wrangled_tbl %>%\n  select(order.date, total.price, state) %>%\n  mutate(year = year(order.date)) %>%\n  \n  group_by(year, state) %>%\n  summarise(sales = sum(total.price)) %>%\n  ungroup() %>%\n  \n  mutate(sales_text = scales::dollar(sales, big.mark = \".\", \n                                     decimal.mark = \",\", \n                                     prefix = \"\", \n                                     suffix = \" €\"))\n\n#> `summarise()` has grouped output by 'year'. You can override using the `.groups`\n#> argument.\n\nsales_by_year_state_tbl %>%\n  ggplot(aes(x = year, y = sales, fill = state)) +\n\n  geom_col() +\n\n  facet_wrap(~ state) +\n\n  scale_y_continuous(labels = scales::dollar_format(big.mark = \".\", \n                                                    decimal.mark = \",\", \n                                                    prefix = \"\", \n                                                    suffix = \" €\")) +\n  labs(\n    title = \"Revenue by year and state\",\n    fill = \"State\" # Changes the legend name\n  ) +\n  \n  theme(axis.text.x = element_text(angle = 45, hjust = 1))"
+  },
+  {
+    "objectID": "content/01_journal/02_data_acquisition.html",
+    "href": "content/01_journal/02_data_acquisition.html",
+    "title": "Data Acquisition",
+    "section": "",
+    "text": "Note\n\n\n\nYou can delete everything in here and start fresh."
   },
   {
     "objectID": "content/01_journal/03_data_wrangling.html",
@@ -21,32 +28,18 @@
     "text": "Note\n\n\n\nYou can delete everything in here and start fresh."
   },
   {
-    "objectID": "content/01_journal/01_tidyverse.html",
-    "href": "content/01_journal/01_tidyverse.html",
-    "title": "Tidyverse",
-    "section": "",
-    "text": "Note\n\n\n\nYou can delete everything in here and start fresh.\nThis is a .qmd file. It is plain text with special features. Any time you write just like this, it will be compiled to normal text in the website. If you put a # in front of your text, it will create a top level-header.\nTo learn more about Quarto websites visit https://quarto.org/docs/websites."
-  },
-  {
-    "objectID": "content/01_journal/01_tidyverse.html#header-2",
-    "href": "content/01_journal/01_tidyverse.html#header-2",
-    "title": "Tidyverse",
-    "section": "\n2.1 Header 2",
-    "text": "2.1 Header 2\nHeader 3\nHeader 4\nHeader 5\nHeader 6"
-  },
-  {
-    "objectID": "content/01_journal/02_data_acquisition.html",
-    "href": "content/01_journal/02_data_acquisition.html",
-    "title": "Data Acquisition",
-    "section": "",
-    "text": "Note\n\n\n\nYou can delete everything in here and start fresh."
-  },
-  {
     "objectID": "content/02_notes/05_class_notes.html",
     "href": "content/02_notes/05_class_notes.html",
     "title": "Class Notes",
     "section": "",
     "text": "IMPORTANT: You can delete everything in here and start fresh. You might want to start by not deleting anything above this line until you know what that stuff is doing.\nThis is an .qmd file. It is plain text with special features. Any time you write just like this, it will be compiled to normal text in the website. If you put a # in front of your text, it will create a top level-header."
+  },
+  {
+    "objectID": "content/03_other/06_links.html",
+    "href": "content/03_other/06_links.html",
+    "title": "Links",
+    "section": "",
+    "text": "R is a free open-source programming language that can be used for statistical analysis, data-simulation, graphing, and lots of other stuff. Another free program is R-studio, that provides a nice graphic interface for R. Download R first, then download R-studio. Both can run on PCs, Macs or Linux. Students will be learning R in the stats labs using the lab manual .\n\n\n\n\nGoogle is great, Google your problem\nStackoverflow is great, google will often take you there because someone has already asked your question, and someone else has answered, usually many people have answered your question many ways."
   },
   {
     "objectID": "index.html",
