@@ -22,18 +22,11 @@ left_join(orderlines_tbl, bikes_tbl, by = c("product.id" = "bike.id"))
 bike_orderlines_joined_tbl <- orderlines_tbl %>%
   left_join(bikes_tbl, by = c("product.id" = "bike.id")) %>%
   left_join(bikeshops_tbl, by = c("customer.id" = "bikeshop.id"))
-bike_orderlines_wrangled_tbl <- bike_orderlines_joined_tbl %>%
-  mutate(total.price = price * quantity)
 
-# Split location into city and state
-bike_orderlines_wrangled_tbl$city <- ""
-bike_orderlines_wrangled_tbl$state <- ""
-for (i in 1:nrow(bike_orderlines_wrangled_tbl)) {
-  location <- strsplit(bike_orderlines_wrangled_tbl$location[i], ", ")[[1]]
-  bike_orderlines_wrangled_tbl$city[i] <- location[1]
-  bike_orderlines_wrangled_tbl$state[i] <- location[2]
-}
-bike_orderlines_wrangled_tbl <- bike_orderlines_wrangled_tbl[, !colnames(bike_orderlines_wrangled_tbl) %in% "location"]
+# Get wrangled table
+bike_orderlines_wrangled_tbl <- bike_orderlines_joined_tbl %>%
+  mutate(total.price = price * quantity) %>%
+  separate(col = location, into = c("city", "state"), sep = ", ")
 
 # Plot by state and year
 sales_by_year_state_tbl <- bike_orderlines_wrangled_tbl %>%
@@ -51,17 +44,14 @@ sales_by_year_state_tbl <- bike_orderlines_wrangled_tbl %>%
 
 sales_by_year_state_tbl %>%
   ggplot(aes(x = year, y = sales, fill = state)) +
-
   geom_col() +
-
   facet_wrap(~ state) +
-
   scale_y_continuous(labels = scales::dollar_format(big.mark = ".", 
                                                     decimal.mark = ",", 
                                                     prefix = "", 
                                                     suffix = " €")) +
   labs(
-    title = "Revenue by year and state",
+    title = "Revenue by state and year",
     fill = "State" # Changes the legend name
   ) +
   
