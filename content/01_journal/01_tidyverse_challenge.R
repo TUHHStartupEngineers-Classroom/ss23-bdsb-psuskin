@@ -1,0 +1,59 @@
+# Load libraries
+library(tidyverse)
+library(readxl)
+library(lubridate)
+
+# Load files
+bikes_tbl      <- read_excel("ds_data/01_bike_sales/01_raw_data/bikes.xlsx")
+orderlines_tbl <- read_excel("ds_data/01_bike_sales/01_raw_data/orderlines.xlsx")
+bikeshops_tbl  <- read_excel("ds_data/01_bike_sales/01_raw_data/bikeshops.xlsx")
+
+# Get joined table
+left_join(orderlines_tbl, bikes_tbl, by = c("product.id" = "bike.id"))
+bike_orderlines_joined_tbl <- orderlines_tbl %>%
+  left_join(bikes_tbl, by = c("product.id" = "bike.id")) %>%
+  left_join(bikeshops_tbl, by = c("customer.id" = "bikeshop.id"))
+bike_orderlines_wrangled_tbl <- bike_orderlines_joined_tbl %>%
+  mutate(total.price = price * quantity)
+
+# Split location into city and state
+bike_orderlines_wrangled_tbl$city <- ""
+bike_orderlines_wrangled_tbl$state <- ""
+for (i in 1:nrow(bike_orderlines_wrangled_tbl)) {
+  location <- strsplit(bike_orderlines_wrangled_tbl$location[i], ", ")[[1]]
+  bike_orderlines_wrangled_tbl$city[i] <- location[1]
+  bike_orderlines_wrangled_tbl$state[i] <- location[2]
+}
+bike_orderlines_wrangled_tbl <- bike_orderlines_wrangled_tbl[, !colnames(bike_orderlines_wrangled_tbl) %in% "location"]
+
+# Plot by state and year
+sales_by_year_state_tbl <- bike_orderlines_wrangled_tbl %>%
+  select(order.date, total.price, state) %>%
+  mutate(year = year(order.date)) %>%
+  
+  group_by(year, state) %>%
+  summarise(sales = sum(total.price)) %>%
+  ungroup() %>%
+  
+  mutate(sales_text = scales::dollar(sales, big.mark = ".", 
+                                     decimal.mark = ",", 
+                                     prefix = "", 
+                                     suffix = " €"))
+
+sales_by_year_state_tbl %>%
+  ggplot(aes(x = year, y = sales, fill = state)) +
+
+  geom_col() +
+
+  facet_wrap(~ state) +
+
+  scale_y_continuous(labels = scales::dollar_format(big.mark = ".", 
+                                                    decimal.mark = ",", 
+                                                    prefix = "", 
+                                                    suffix = " €")) +
+  labs(
+    title = "Revenue by year and state",
+    fill = "State" # Changes the legend name
+  ) +
+  
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
