@@ -5,30 +5,37 @@ author: "Philip Suskin"
 
 # Solution
 
-```{r plot, fig.width=12, fig.height=8}
-
-# Load libraries
+## Load libraries
+```{r}
 library(tidyverse)
 library(readxl)
 library(lubridate)
+```
 
-# Load files
+## Load files
+```{r}
 bikes_tbl      <- read_excel("../../ds_data/01_bike_sales/01_raw_data/bikes.xlsx")
 orderlines_tbl <- read_excel("../../ds_data/01_bike_sales/01_raw_data/orderlines.xlsx")
 bikeshops_tbl  <- read_excel("../../ds_data/01_bike_sales/01_raw_data/bikeshops.xlsx")
+```
 
-# Get joined table
+## Get joined table
+```{r}
 left_join(orderlines_tbl, bikes_tbl, by = c("product.id" = "bike.id"))
 bike_orderlines_joined_tbl <- orderlines_tbl %>%
   left_join(bikes_tbl, by = c("product.id" = "bike.id")) %>%
   left_join(bikeshops_tbl, by = c("customer.id" = "bikeshop.id"))
+```
 
-# Get wrangled table
+## Get wrangled table
+```{r}
 bike_orderlines_wrangled_tbl <- bike_orderlines_joined_tbl %>%
   mutate(total.price = price * quantity) %>%
   separate(col = location, into = c("city", "state"), sep = ", ")
+```
 
-# Plot by state and year
+## Get state and year table
+```{r}
 sales_by_year_state_tbl <- bike_orderlines_wrangled_tbl %>%
   select(order.date, total.price, state) %>%
   mutate(year = year(order.date)) %>%
@@ -41,7 +48,10 @@ sales_by_year_state_tbl <- bike_orderlines_wrangled_tbl %>%
                                      decimal.mark = ",", 
                                      prefix = "", 
                                      suffix = " €"))
+```
 
+## Plot by state and year
+```{r plot, fig.width=12, fig.height=8}
 sales_by_year_state_tbl %>%
   ggplot(aes(x = year, y = sales, fill = state)) +
   geom_col() +
@@ -56,5 +66,4 @@ sales_by_year_state_tbl %>%
   ) +
   
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
 ```
