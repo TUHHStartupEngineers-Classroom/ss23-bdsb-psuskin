@@ -1,64 +1,7 @@
----
-title: "Data Acquisition"
-author: "Philip Suskin"
-execute: 
-  echo: false
----
-
-# Solution challenge 1
-
-## Load libraries
-```{r}
-#| echo: true
-library(ROpenWeatherMap)
-library(tibble)
-```
-
-## Set API Key (I have to hide this)
-```{r}
-API_KEY = "4168e37e031c475c3ac014612bfc9564"
-```
-
-## Get weather data (as list of lists)
-```{r}
-#| echo: true
-current_weather <- get_current_weather(API_KEY, city = "Hamburg")
-```
-
-## Create table from relevant data points
-```{r}
-#| echo: true
-weather_data <- tibble(weather.type = current_weather$weather$main,
-                       weather.subtype = current_weather$weather$description,
-                       weather.temp = current_weather$main$temp,
-                       weather.feels_like = current_weather$main$feels_like,
-                       weather.temp_min = current_weather$main$temp_min,
-                       weather.temp_max = current_weather$main$temp_max,
-                       weather.pressure = current_weather$main$pressure,
-                       weather.humidity = current_weather$main$humidity,
-                       wind.speed = current_weather$wind$speed,
-                       wind.degree = current_weather$wind$deg)
-```
-
-## Display table
-```{r}
-#| echo: true
-weather_data
-```
-
-# Solution challenge 2
-
-## Load libraries
-```{r}
-#| echo: true
 library(tidyverse)
 library(glue)
 library(rvest)
-```
 
-## Get bike category links
-```{r}
-#| echo: true
 url_home <- "https://www.rosebikes.de/fahrräder"
 html_home <- read_html(url_home)
 
@@ -72,11 +15,7 @@ links <- links[1:9] %>%
   mutate(
     url = glue("https://www.rosebikes.de{subdirectory}"))  %>%
   distinct(url)
-```
 
-## Define function to scrape relevant data points
-```{r}
-#| echo: true
 get_data <- function(url) {
   html_bike_cat <- read_html(url)
   
@@ -102,11 +41,7 @@ get_data <- function(url) {
   
   return(list("listings" = listings, "names" = names, "categories" = categories))
 }
-```
 
-## Create table from relevant data points
-```{r}
-#| echo: true
 data <- get_data(links$url[1])
 
 bike_data <- tibble(bike.type = data$categories,
@@ -120,10 +55,5 @@ for (i in 2:9) {
                                      bike.name = data$names,
                                      bike.price = as.numeric(data$listings))
 }
-```
 
-## Display table
-```{r}
-#| echo: true
 head(bike_data, 10)
-```
