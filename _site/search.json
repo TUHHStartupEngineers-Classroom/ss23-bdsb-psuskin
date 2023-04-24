@@ -53,7 +53,63 @@
     "href": "content/01_journal/03_data_wrangling.html",
     "title": "Data Wrangling",
     "section": "",
-    "text": "Note\n\n\n\nYou can delete everything in here and start fresh."
+    "text": "library(tidyverse)\n\n#> -- Attaching core tidyverse packages ------------------------ tidyverse 2.0.0 --\n#> v dplyr     1.1.2     v readr     2.1.4\n#> v forcats   1.0.0     v stringr   1.5.0\n#> v ggplot2   3.4.2     v tibble    3.2.1\n#> v lubridate 1.9.2     v tidyr     1.3.0\n#> v purrr     1.0.1     -- Conflicts ------------------------------------------ tidyverse_conflicts() --\n#> x dplyr::between()         masks data.table::between()\n#> x readr::col_character()   masks vroom::col_character()\n#> x readr::col_date()        masks vroom::col_date()\n#> x readr::col_datetime()    masks vroom::col_datetime()\n#> x readr::col_double()      masks vroom::col_double()\n#> x readr::col_factor()      masks vroom::col_factor()\n#> x readr::col_guess()       masks vroom::col_guess()\n#> x readr::col_integer()     masks vroom::col_integer()\n#> x readr::col_logical()     masks vroom::col_logical()\n#> x readr::col_number()      masks vroom::col_number()\n#> x readr::col_skip()        masks vroom::col_skip()\n#> x readr::col_time()        masks vroom::col_time()\n#> x readr::cols()            masks vroom::cols()\n#> x readr::date_names_lang() masks vroom::date_names_lang()\n#> x readr::default_locale()  masks vroom::default_locale()\n#> x dplyr::filter()          masks stats::filter()\n#> x dplyr::first()           masks data.table::first()\n#> x readr::fwf_cols()        masks vroom::fwf_cols()\n#> x readr::fwf_empty()       masks vroom::fwf_empty()\n#> x readr::fwf_positions()   masks vroom::fwf_positions()\n#> x readr::fwf_widths()      masks vroom::fwf_widths()\n#> x lubridate::hour()        masks data.table::hour()\n#> x lubridate::isoweek()     masks data.table::isoweek()\n#> x dplyr::lag()             masks stats::lag()\n#> x dplyr::last()            masks data.table::last()\n#> x readr::locale()          masks vroom::locale()\n#> x lubridate::mday()        masks data.table::mday()\n#> x lubridate::minute()      masks data.table::minute()\n#> x lubridate::month()       masks data.table::month()\n#> x readr::output_column()   masks vroom::output_column()\n#> x readr::problems()        masks vroom::problems()\n#> x lubridate::quarter()     masks data.table::quarter()\n#> x lubridate::second()      masks data.table::second()\n#> x purrr::transpose()       masks data.table::transpose()\n#> x lubridate::wday()        masks data.table::wday()\n#> x lubridate::week()        masks data.table::week()\n#> x lubridate::yday()        masks data.table::yday()\n#> x lubridate::year()        masks data.table::year()\n#> i Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors\n\nlibrary(vroom)\nlibrary(data.table)\n\n\n\n\n\ncol_types <- list(\n  id = col_character(),\n  type = col_character(),\n  number = col_character(),\n  country = col_character(),\n  date = col_date(\"%Y-%m-%d\"),\n  abstract = col_character(),\n  title = col_character(),\n  kind = col_character(),\n  num_claims = col_double(),\n  filename = col_character(),\n  withdrawn = col_double()\n)\n\n\n\n\n\npatent_tb1 <- vroom(\n  file       = '../../Patent_data_reduced/patent.tsv', \n  delim      = \"\\t\", \n  col_types  = col_types,\n  na         = c(\"\", \"NA\", \"NULL\")\n)\n\n#> Warning: The following named parsers don't match the column names: type, number,\n#> country, abstract, title, kind, filename, withdrawn\n\nassignee_tb1 <- vroom(\n  file       = '../../Patent_data_reduced/assignee.tsv', \n  delim      = \"\\t\", \n  col_types  = col_types,\n  na         = c(\"\", \"NA\", \"NULL\")\n)\n\n#> Warning: The following named parsers don't match the column names: number,\n#> country, date, abstract, title, kind, num_claims, filename, withdrawn\n\npatent_assignee_tb1 <- vroom(\n  file       = '../../Patent_data_reduced/patent_assignee.tsv', \n  delim      = \"\\t\", \n  col_types  = col_types,\n  na         = c(\"\", \"NA\", \"NULL\"))\n\n#> Warning: The following named parsers don't match the column names: id, type,\n#> number, country, date, abstract, title, kind, num_claims, filename, withdrawn\n\nuspc_tb1 <- vroom(\n  file       = '../../Patent_data_reduced/uspc.tsv', \n  delim      = \"\\t\", \n  col_types  = col_types,\n  na         = c(\"\", \"NA\", \"NULL\")) %>%\n  transform(patent_id = as.character(patent_id))\n\n#> Warning: The following named parsers don't match the column names: id, type,\n#> number, country, date, abstract, title, kind, num_claims, filename, withdrawn\n\n\n\n\n\n\nwrangled <- assignee_tb1 %>%\n  left_join(patent_assignee_tb1, by = c(\"id\" = \"assignee_id\")) %>%\n  left_join(patent_tb1, by = c(\"patent_id\" = \"id\")) %>%\n  left_join(uspc_tb1, by = \"patent_id\")\n\n#> Warning in left_join(., uspc_tb1, by = \"patent_id\"): Detected an unexpected\n#> many-to-many relationship between `x` and `y`."
+  },
+  {
+    "objectID": "content/01_journal/03_data_wrangling.html#get-patent-leaders",
+    "href": "content/01_journal/03_data_wrangling.html#get-patent-leaders",
+    "title": "Data Wrangling",
+    "section": "2.1 Get patent leaders",
+    "text": "2.1 Get patent leaders\n\npatent_leaders <- sort(table(wrangled$organization), decreasing=T)[1:10] %>%\n  as.data.frame() %>%\n  mutate(Var1 = Var1 %>% str_to_title())"
+  },
+  {
+    "objectID": "content/01_journal/03_data_wrangling.html#display-patent-leaders-in-table",
+    "href": "content/01_journal/03_data_wrangling.html#display-patent-leaders-in-table",
+    "title": "Data Wrangling",
+    "section": "2.2 Display patent leaders in table",
+    "text": "2.2 Display patent leaders in table\n\ndata.table(\n  \"Organization\" = patent_leaders$Var1,\n  \"No. of patents (2014)\" = patent_leaders$Freq)"
+  },
+  {
+    "objectID": "content/01_journal/03_data_wrangling.html#get-august-wrangled-table",
+    "href": "content/01_journal/03_data_wrangling.html#get-august-wrangled-table",
+    "title": "Data Wrangling",
+    "section": "3.1 Get August wrangled table",
+    "text": "3.1 Get August wrangled table\n\nwrangled_august <- wrangled %>% \n  select(organization, date) %>%\n  filter(date >= \"2014-08-01\" & date <= \"2014-08-31\")"
+  },
+  {
+    "objectID": "content/01_journal/03_data_wrangling.html#get-august-patent-leaders",
+    "href": "content/01_journal/03_data_wrangling.html#get-august-patent-leaders",
+    "title": "Data Wrangling",
+    "section": "3.2 Get August patent leaders",
+    "text": "3.2 Get August patent leaders\n\npatent_leaders_august <- sort(table(wrangled_august$organization), decreasing=T)[1:10] %>%\n  as.data.frame() %>%\n  mutate(Var1 = Var1 %>% str_to_title())"
+  },
+  {
+    "objectID": "content/01_journal/03_data_wrangling.html#display-august-patent-leaders-in-table",
+    "href": "content/01_journal/03_data_wrangling.html#display-august-patent-leaders-in-table",
+    "title": "Data Wrangling",
+    "section": "3.3 Display August patent leaders in table",
+    "text": "3.3 Display August patent leaders in table\n\ndata.table(\n  \"Organization\" = patent_leaders_august$Var1,\n  \"No. of patents (August 2014)\" = patent_leaders_august$Freq)"
+  },
+  {
+    "objectID": "content/01_journal/03_data_wrangling.html#get-class-wrangled-table",
+    "href": "content/01_journal/03_data_wrangling.html#get-class-wrangled-table",
+    "title": "Data Wrangling",
+    "section": "4.1 Get class wrangled table",
+    "text": "4.1 Get class wrangled table\n\nwrangled_class <- wrangled %>%\n  select(organization, mainclass_id) %>%\n  filter(organization %in% patent_leaders$Var1[1:10]) %>% \n  subset(mainclass_id != \"No longer published\")"
+  },
+  {
+    "objectID": "content/01_journal/03_data_wrangling.html#get-class-patent-leaders",
+    "href": "content/01_journal/03_data_wrangling.html#get-class-patent-leaders",
+    "title": "Data Wrangling",
+    "section": "4.2 Get class patent leaders",
+    "text": "4.2 Get class patent leaders\n\nclass_leaders <- sort(table(wrangled_class$mainclass_id), decreasing=T)[1:5] %>% \n  as.data.frame() %>%\n  mutate(Var1 = Var1 %>% str_to_title())"
+  },
+  {
+    "objectID": "content/01_journal/03_data_wrangling.html#display-class-patent-leaders-in-table",
+    "href": "content/01_journal/03_data_wrangling.html#display-class-patent-leaders-in-table",
+    "title": "Data Wrangling",
+    "section": "4.3 Display class patent leaders in table",
+    "text": "4.3 Display class patent leaders in table\n\ndata.table(\n  \"USPTO tech main class (id since can't find name) for top 10 companies (US since can't find worldwide)\" = class_leaders$Var1,\n  \"No. of patents (2014)\" = class_leaders$Freq)"
   },
   {
     "objectID": "content/01_journal/04_data_visualization.html",
