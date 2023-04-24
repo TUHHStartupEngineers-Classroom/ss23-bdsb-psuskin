@@ -2,11 +2,11 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.2.269">
+<meta name="generator" content="quarto-1.2.335">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="Joschka Schwarz">
+<meta name="author" content="Philip Suskin">
 
 <title>MyLabJournal - Data Acquisition</title>
 <style>
@@ -21,6 +21,69 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1.6em;
   vertical-align: middle;
 }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
 </style>
 
 
@@ -62,6 +125,9 @@ ul.task-list li input[type="checkbox"] {
     "search-submit-button-title": "Submit"
   }
 }</script>
+
+<link href="../../site_libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet">
+<script src="../../site_libs/pagedtable-1.1/js/pagedtable.js"></script>
 
 
 </head>
@@ -131,7 +197,28 @@ ul.task-list li input[type="checkbox"] {
 <!-- sidebar -->
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Contents</h2>
+   
+  <ul class="collapse">
+  <li><a href="#solution-challenge-1" id="toc-solution-challenge-1" class="nav-link active" data-scroll-target="#solution-challenge-1"><span class="toc-section-number">1</span>  Solution challenge 1</a>
+  <ul class="collapse">
+  <li><a href="#load-libraries" id="toc-load-libraries" class="nav-link" data-scroll-target="#load-libraries"><span class="toc-section-number">1.1</span>  Load libraries</a></li>
+  <li><a href="#set-api-key-i-have-to-hide-this" id="toc-set-api-key-i-have-to-hide-this" class="nav-link" data-scroll-target="#set-api-key-i-have-to-hide-this"><span class="toc-section-number">1.2</span>  Set API Key (I have to hide this)</a></li>
+  <li><a href="#get-weather-data-as-list-of-lists" id="toc-get-weather-data-as-list-of-lists" class="nav-link" data-scroll-target="#get-weather-data-as-list-of-lists"><span class="toc-section-number">1.3</span>  Get weather data (as list of lists)</a></li>
+  <li><a href="#create-table-from-relevant-data-points" id="toc-create-table-from-relevant-data-points" class="nav-link" data-scroll-target="#create-table-from-relevant-data-points"><span class="toc-section-number">1.4</span>  Create table from relevant data points</a></li>
+  <li><a href="#display-table" id="toc-display-table" class="nav-link" data-scroll-target="#display-table"><span class="toc-section-number">1.5</span>  Display table</a></li>
+  </ul></li>
+  <li><a href="#solution-challenge-2" id="toc-solution-challenge-2" class="nav-link" data-scroll-target="#solution-challenge-2"><span class="toc-section-number">2</span>  Solution challenge 2</a>
+  <ul class="collapse">
+  <li><a href="#load-libraries-1" id="toc-load-libraries-1" class="nav-link" data-scroll-target="#load-libraries-1"><span class="toc-section-number">2.1</span>  Load libraries</a></li>
+  <li><a href="#get-bike-category-links" id="toc-get-bike-category-links" class="nav-link" data-scroll-target="#get-bike-category-links"><span class="toc-section-number">2.2</span>  Get bike category links</a></li>
+  <li><a href="#define-function-to-scrape-relevant-data-points" id="toc-define-function-to-scrape-relevant-data-points" class="nav-link" data-scroll-target="#define-function-to-scrape-relevant-data-points"><span class="toc-section-number">2.3</span>  Define function to scrape relevant data points</a></li>
+  <li><a href="#create-table-from-relevant-data-points-1" id="toc-create-table-from-relevant-data-points-1" class="nav-link" data-scroll-target="#create-table-from-relevant-data-points-1"><span class="toc-section-number">2.4</span>  Create table from relevant data points</a></li>
+  <li><a href="#display-table-1" id="toc-display-table-1" class="nav-link" data-scroll-target="#display-table-1"><span class="toc-section-number">2.5</span>  Display table</a></li>
+  </ul></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -148,7 +235,7 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">Author</div>
     <div class="quarto-title-meta-contents">
-             <p>Joschka Schwarz </p>
+             <p>Philip Suskin </p>
           </div>
   </div>
     
@@ -159,21 +246,168 @@ ul.task-list li input[type="checkbox"] {
 
 </header>
 
-<div class="callout-note callout callout-style-default callout-captioned">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
+<section id="solution-challenge-1" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Solution challenge 1</h1>
+<section id="load-libraries" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="load-libraries"><span class="header-section-number">1.1</span> Load libraries</h2>
+<div class="cell" data-hash="02_data_acquisition_cache/html/unnamed-chunk-2_4b7cadff5319f95e909ef9ed47c3f467">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="fu">library</span>(ROpenWeatherMap)</span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="fu">library</span>(tibble)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="callout-caption-container flex-fill">
-Note
+</section>
+<section id="set-api-key-i-have-to-hide-this" class="level2" data-number="1.2">
+<h2 data-number="1.2" class="anchored" data-anchor-id="set-api-key-i-have-to-hide-this"><span class="header-section-number">1.2</span> Set API Key (I have to hide this)</h2>
+<div class="cell" data-hash="02_data_acquisition_cache/html/unnamed-chunk-4_cbc4c3af6c23da0615f5c4ac1c907c3a">
+
+</div>
+</section>
+<section id="get-weather-data-as-list-of-lists" class="level2" data-number="1.3">
+<h2 data-number="1.3" class="anchored" data-anchor-id="get-weather-data-as-list-of-lists"><span class="header-section-number">1.3</span> Get weather data (as list of lists)</h2>
+<div class="cell" data-hash="02_data_acquisition_cache/html/unnamed-chunk-6_e0cdf0b6775aa21789df25b79aaafb27">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a>current_weather <span class="ot">&lt;-</span> <span class="fu">get_current_weather</span>(API_KEY, <span class="at">city =</span> <span class="st">"Hamburg"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="create-table-from-relevant-data-points" class="level2" data-number="1.4">
+<h2 data-number="1.4" class="anchored" data-anchor-id="create-table-from-relevant-data-points"><span class="header-section-number">1.4</span> Create table from relevant data points</h2>
+<div class="cell" data-hash="02_data_acquisition_cache/html/unnamed-chunk-8_ef47dac6d74ebf45c6d279f2a95e88ac">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>weather_data <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">weather.type =</span> current_weather<span class="sc">$</span>weather<span class="sc">$</span>main,</span>
+<span id="cb3-2"><a href="#cb3-2"></a>                       <span class="at">weather.subtype =</span> current_weather<span class="sc">$</span>weather<span class="sc">$</span>description,</span>
+<span id="cb3-3"><a href="#cb3-3"></a>                       <span class="at">weather.temp =</span> current_weather<span class="sc">$</span>main<span class="sc">$</span>temp,</span>
+<span id="cb3-4"><a href="#cb3-4"></a>                       <span class="at">weather.feels_like =</span> current_weather<span class="sc">$</span>main<span class="sc">$</span>feels_like,</span>
+<span id="cb3-5"><a href="#cb3-5"></a>                       <span class="at">weather.temp_min =</span> current_weather<span class="sc">$</span>main<span class="sc">$</span>temp_min,</span>
+<span id="cb3-6"><a href="#cb3-6"></a>                       <span class="at">weather.temp_max =</span> current_weather<span class="sc">$</span>main<span class="sc">$</span>temp_max,</span>
+<span id="cb3-7"><a href="#cb3-7"></a>                       <span class="at">weather.pressure =</span> current_weather<span class="sc">$</span>main<span class="sc">$</span>pressure,</span>
+<span id="cb3-8"><a href="#cb3-8"></a>                       <span class="at">weather.humidity =</span> current_weather<span class="sc">$</span>main<span class="sc">$</span>humidity,</span>
+<span id="cb3-9"><a href="#cb3-9"></a>                       <span class="at">wind.speed =</span> current_weather<span class="sc">$</span>wind<span class="sc">$</span>speed,</span>
+<span id="cb3-10"><a href="#cb3-10"></a>                       <span class="at">wind.degree =</span> current_weather<span class="sc">$</span>wind<span class="sc">$</span>deg)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="display-table" class="level2" data-number="1.5">
+<h2 data-number="1.5" class="anchored" data-anchor-id="display-table"><span class="header-section-number">1.5</span> Display table</h2>
+<div class="cell" data-hash="02_data_acquisition_cache/html/unnamed-chunk-10_a7f1c5b39880909e6679a39b54dd8cad">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a>weather_data</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["weather.type"],"name":[1],"type":["chr"],"align":["left"]},{"label":["weather.subtype"],"name":[2],"type":["chr"],"align":["left"]},{"label":["weather.temp"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["weather.feels_like"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["weather.temp_min"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["weather.temp_max"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["weather.pressure"],"name":[7],"type":["int"],"align":["right"]},{"label":["weather.humidity"],"name":[8],"type":["int"],"align":["right"]},{"label":["wind.speed"],"name":[9],"type":["dbl"],"align":["right"]},{"label":["wind.degree"],"name":[10],"type":["int"],"align":["right"]}],"data":[{"1":"Rain","2":"light rain","3":"285.07","4":"284.59","5":"284.15","6":"286.09","7":"1001","8":"87","9":"3.6","10":"130"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
 </div>
 </div>
-<div class="callout-body-container callout-body">
-<p>You can delete everything in here and start fresh.</p>
+</div>
+</section>
+</section>
+<section id="solution-challenge-2" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Solution challenge 2</h1>
+<section id="load-libraries-1" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="load-libraries-1"><span class="header-section-number">2.1</span> Load libraries</h2>
+<div class="cell" data-hash="02_data_acquisition_cache/html/unnamed-chunk-12_c04e72377351d020317e7706f7515b88">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>#&gt; -- Attaching core tidyverse packages ------------------------ tidyverse 2.0.0 --
+#&gt; v dplyr     1.1.2     v purrr     1.0.1
+#&gt; v forcats   1.0.0     v readr     2.1.4
+#&gt; v ggplot2   3.4.2     v stringr   1.5.0
+#&gt; v lubridate 1.9.2     v tidyr     1.3.0-- Conflicts ------------------------------------------ tidyverse_conflicts() --
+#&gt; x dplyr::filter() masks stats::filter()
+#&gt; x dplyr::lag()    masks stats::lag()
+#&gt; i Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a><span class="fu">library</span>(glue)</span>
+<span id="cb7-2"><a href="#cb7-2"></a><span class="fu">library</span>(rvest)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>#&gt; 
+#&gt; Attaching package: 'rvest'
+#&gt; 
+#&gt; The following object is masked from 'package:readr':
+#&gt; 
+#&gt;     guess_encoding</code></pre>
+</div>
+</div>
+</section>
+<section id="get-bike-category-links" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="get-bike-category-links"><span class="header-section-number">2.2</span> Get bike category links</h2>
+<div class="cell" data-hash="02_data_acquisition_cache/html/unnamed-chunk-14_c5272405f7471300ded9704990bfd782">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a>url_home <span class="ot">&lt;-</span> <span class="st">"https://www.rosebikes.de/fahrräder"</span></span>
+<span id="cb9-2"><a href="#cb9-2"></a>html_home <span class="ot">&lt;-</span> <span class="fu">read_html</span>(url_home)</span>
+<span id="cb9-3"><a href="#cb9-3"></a></span>
+<span id="cb9-4"><a href="#cb9-4"></a>bike_cats <span class="ot">&lt;-</span> html_home <span class="sc">%&gt;%</span></span>
+<span id="cb9-5"><a href="#cb9-5"></a>  <span class="fu">html_nodes</span>(<span class="at">css =</span> <span class="st">".catalog-navigation__link"</span>)</span>
+<span id="cb9-6"><a href="#cb9-6"></a></span>
+<span id="cb9-7"><a href="#cb9-7"></a>links <span class="ot">&lt;-</span> <span class="fu">sapply</span>(bike_cats, <span class="cf">function</span>(x) {x <span class="sc">%&gt;%</span> <span class="fu">html_attr</span>(<span class="st">"href"</span>)})</span>
+<span id="cb9-8"><a href="#cb9-8"></a></span>
+<span id="cb9-9"><a href="#cb9-9"></a>links <span class="ot">&lt;-</span> links[<span class="dv">1</span><span class="sc">:</span><span class="dv">9</span>] <span class="sc">%&gt;%</span></span>
+<span id="cb9-10"><a href="#cb9-10"></a>  <span class="fu">enframe</span>(<span class="at">name =</span> <span class="st">"position"</span>, <span class="at">value =</span> <span class="st">"subdirectory"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb9-11"><a href="#cb9-11"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb9-12"><a href="#cb9-12"></a>    <span class="at">url =</span> <span class="fu">glue</span>(<span class="st">"https://www.rosebikes.de{subdirectory}"</span>))  <span class="sc">%&gt;%</span></span>
+<span id="cb9-13"><a href="#cb9-13"></a>  <span class="fu">distinct</span>(url)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="define-function-to-scrape-relevant-data-points" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="define-function-to-scrape-relevant-data-points"><span class="header-section-number">2.3</span> Define function to scrape relevant data points</h2>
+<div class="cell" data-hash="02_data_acquisition_cache/html/unnamed-chunk-16_bb3c001f48cbc97b003145a012bd8da5">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a>get_data <span class="ot">&lt;-</span> <span class="cf">function</span>(url) {</span>
+<span id="cb10-2"><a href="#cb10-2"></a>  html_bike_cat <span class="ot">&lt;-</span> <span class="fu">read_html</span>(url)</span>
+<span id="cb10-3"><a href="#cb10-3"></a>  </span>
+<span id="cb10-4"><a href="#cb10-4"></a>  listings <span class="ot">&lt;-</span> <span class="fu">html_nodes</span>(html_bike_cat, <span class="at">css =</span> <span class="st">'.catalog-category-bikes__price-title'</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb10-5"><a href="#cb10-5"></a>    <span class="fu">html_text</span>(<span class="at">trim=</span><span class="cn">TRUE</span>) <span class="sc">%&gt;%</span>              </span>
+<span id="cb10-6"><a href="#cb10-6"></a>    <span class="fu">str_replace_all</span>(<span class="st">" "</span>,<span class="st">""</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb10-7"><a href="#cb10-7"></a>    <span class="fu">str_replace_all</span>(<span class="st">"ab"</span>, <span class="st">""</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb10-8"><a href="#cb10-8"></a>    <span class="fu">str_replace_all</span>(<span class="st">"€"</span>, <span class="st">""</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb10-9"><a href="#cb10-9"></a>    <span class="fu">str_replace_all</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">"</span>, <span class="st">""</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb10-10"><a href="#cb10-10"></a>    <span class="fu">str_replace_all</span>(<span class="st">"</span><span class="sc">\\</span><span class="st">."</span>, <span class="st">""</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb10-11"><a href="#cb10-11"></a>    <span class="fu">str_replace_all</span>(<span class="st">","</span>, <span class="st">"</span><span class="sc">\\</span><span class="st">."</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb10-12"><a href="#cb10-12"></a>    <span class="fu">iconv</span>(<span class="st">'utf-8'</span>, <span class="st">'ascii'</span>, <span class="at">sub=</span><span class="st">''</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb10-13"><a href="#cb10-13"></a>    <span class="fu">as.numeric</span>()</span>
+<span id="cb10-14"><a href="#cb10-14"></a>  </span>
+<span id="cb10-15"><a href="#cb10-15"></a>  names <span class="ot">&lt;-</span> <span class="fu">html_nodes</span>(html_bike_cat, <span class="at">xpath =</span> <span class="st">'//basic-headline/h4'</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb10-16"><a href="#cb10-16"></a>    <span class="fu">html_text</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb10-17"><a href="#cb10-17"></a>    <span class="fu">str_replace_all</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">"</span>, <span class="st">""</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb10-18"><a href="#cb10-18"></a>    <span class="fu">str_to_title</span>()</span>
+<span id="cb10-19"><a href="#cb10-19"></a>  </span>
+<span id="cb10-20"><a href="#cb10-20"></a>  categories <span class="ot">&lt;-</span> <span class="fu">rep</span>(url <span class="sc">%&gt;%</span> <span class="fu">str_replace_all</span>(<span class="st">"https://www.rosebikes.de/fahrräder/"</span>, <span class="st">""</span>), </span>
+<span id="cb10-21"><a href="#cb10-21"></a>              <span class="at">each=</span><span class="fu">length</span>(names)) <span class="sc">%&gt;%</span></span>
+<span id="cb10-22"><a href="#cb10-22"></a>    <span class="fu">str_to_title</span>()</span>
+<span id="cb10-23"><a href="#cb10-23"></a>  </span>
+<span id="cb10-24"><a href="#cb10-24"></a>  <span class="fu">return</span>(<span class="fu">list</span>(<span class="st">"listings"</span> <span class="ot">=</span> listings, <span class="st">"names"</span> <span class="ot">=</span> names, <span class="st">"categories"</span> <span class="ot">=</span> categories))</span>
+<span id="cb10-25"><a href="#cb10-25"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="create-table-from-relevant-data-points-1" class="level2" data-number="2.4">
+<h2 data-number="2.4" class="anchored" data-anchor-id="create-table-from-relevant-data-points-1"><span class="header-section-number">2.4</span> Create table from relevant data points</h2>
+<div class="cell" data-hash="02_data_acquisition_cache/html/unnamed-chunk-18_adc212dff84e670f760e0c5640d93fd2">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a>data <span class="ot">&lt;-</span> <span class="fu">get_data</span>(links<span class="sc">$</span>url[<span class="dv">1</span>])</span>
+<span id="cb11-2"><a href="#cb11-2"></a></span>
+<span id="cb11-3"><a href="#cb11-3"></a>bike_data <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">bike.type =</span> data<span class="sc">$</span>categories,</span>
+<span id="cb11-4"><a href="#cb11-4"></a>                    <span class="at">bike.name =</span> data<span class="sc">$</span>names,</span>
+<span id="cb11-5"><a href="#cb11-5"></a>                    <span class="at">bike.price =</span> <span class="fu">as.numeric</span>(data<span class="sc">$</span>listings))</span>
+<span id="cb11-6"><a href="#cb11-6"></a></span>
+<span id="cb11-7"><a href="#cb11-7"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span><span class="dv">9</span>) {</span>
+<span id="cb11-8"><a href="#cb11-8"></a>  data <span class="ot">&lt;-</span> <span class="fu">get_data</span>(links<span class="sc">$</span>url[i])</span>
+<span id="cb11-9"><a href="#cb11-9"></a>  </span>
+<span id="cb11-10"><a href="#cb11-10"></a>  bike_data <span class="ot">&lt;-</span> bike_data <span class="sc">%&gt;%</span> <span class="fu">add_row</span>(<span class="at">bike.type =</span> data<span class="sc">$</span>categories,</span>
+<span id="cb11-11"><a href="#cb11-11"></a>                                     <span class="at">bike.name =</span> data<span class="sc">$</span>names,</span>
+<span id="cb11-12"><a href="#cb11-12"></a>                                     <span class="at">bike.price =</span> <span class="fu">as.numeric</span>(data<span class="sc">$</span>listings))</span>
+<span id="cb11-13"><a href="#cb11-13"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="display-table-1" class="level2" data-number="2.5">
+<h2 data-number="2.5" class="anchored" data-anchor-id="display-table-1"><span class="header-section-number">2.5</span> Display table</h2>
+<div class="cell" data-hash="02_data_acquisition_cache/html/unnamed-chunk-20_e0878609dcb6c1424d206c23578029bf">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a><span class="fu">head</span>(bike_data, <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["bike.type"],"name":[1],"type":["chr"],"align":["left"]},{"label":["bike.name"],"name":[2],"type":["chr"],"align":["left"]},{"label":["bike.price"],"name":[3],"type":["dbl"],"align":["right"]}],"data":[{"1":"Mtb","2":"Count Solo","3":"749"},{"1":"Mtb","2":"Psycho Path","3":"1499"},{"1":"Mtb","2":"Thrill Hill","3":"2999"},{"1":"Mtb","2":"Root Miller Plus","3":"4999"},{"1":"Mtb","2":"Ground Control","3":"1999"},{"1":"Mtb","2":"Root Miller","3":"2299"},{"1":"Mtb","2":"Bonero","3":"1499"},{"1":"Mtb","2":"Soul Fire","3":"1999"},{"1":"Mtb","2":"The Bruce","3":"899"},{"1":"Rennrad","2":"Xlite","3":"2999"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
 </div>
 </div>
 
 
+</section>
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

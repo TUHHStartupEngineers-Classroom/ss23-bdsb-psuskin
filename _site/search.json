@@ -1,5 +1,138 @@
 [
   {
+    "objectID": "content/01_journal/01_tidyverse.html",
+    "href": "content/01_journal/01_tidyverse.html",
+    "title": "Tidyverse",
+    "section": "",
+    "text": "library(tidyverse)\nlibrary(readxl)\nlibrary(lubridate)\n\n\n\n\n\nbikes_tbl      <- read_excel(\"../../ds_data/01_bike_sales/01_raw_data/bikes.xlsx\")\norderlines_tbl <- read_excel(\"../../ds_data/01_bike_sales/01_raw_data/orderlines.xlsx\")\n\n#> New names:\n\nbikeshops_tbl  <- read_excel(\"../../ds_data/01_bike_sales/01_raw_data/bikeshops.xlsx\")\n\n\n\n\n\nleft_join(orderlines_tbl, bikes_tbl, by = c(\"product.id\" = \"bike.id\"))\n\n\n\n  \n\n\nbike_orderlines_joined_tbl <- orderlines_tbl %>%\n  left_join(bikes_tbl, by = c(\"product.id\" = \"bike.id\")) %>%\n  left_join(bikeshops_tbl, by = c(\"customer.id\" = \"bikeshop.id\"))\n\n\n\n\n\nbike_orderlines_wrangled_tbl <- bike_orderlines_joined_tbl %>%\n  mutate(total.price = price * quantity) %>%\n  separate(col = location, into = c(\"city\", \"state\"), sep = \", \")\n\n\n\n\n\nsales_by_year_state_tbl <- bike_orderlines_wrangled_tbl %>%\n  select(order.date, total.price, state) %>%\n  mutate(year = year(order.date)) %>%\n  \n  group_by(year, state) %>%\n  summarise(sales = sum(total.price)) %>%\n  ungroup() %>%\n  \n  mutate(sales_text = scales::dollar(sales, big.mark = \".\", \n                                     decimal.mark = \",\", \n                                     prefix = \"\", \n                                     suffix = \" €\"))\n\n#> `summarise()` has grouped output by 'year'. You can override using the `.groups`\n#> argument.\n\n\n\n\n\n\nsales_by_year_state_tbl %>%\n  ggplot(aes(x = year, y = sales, fill = state)) +\n  geom_col() +\n  facet_wrap(~ state) +\n  scale_y_continuous(labels = scales::dollar_format(big.mark = \".\", \n                                                    decimal.mark = \",\", \n                                                    prefix = \"\", \n                                                    suffix = \" €\")) +\n  labs(\n    title = \"Revenue by state and year\",\n    fill = \"State\" # Changes the legend name\n  ) +\n  \n  theme(axis.text.x = element_text(angle = 45, hjust = 1))"
+  },
+  {
+    "objectID": "content/01_journal/02_data_acquisition.html",
+    "href": "content/01_journal/02_data_acquisition.html",
+    "title": "Data Acquisition",
+    "section": "",
+    "text": "library(ROpenWeatherMap)\nlibrary(tibble)\n\n\n\n\n\n\n\n\n\n\n\ncurrent_weather <- get_current_weather(API_KEY, city = \"Hamburg\")\n\n\n\n\n\nweather_data <- tibble(weather.type = current_weather$weather$main,\n                       weather.subtype = current_weather$weather$description,\n                       weather.temp = current_weather$main$temp,\n                       weather.feels_like = current_weather$main$feels_like,\n                       weather.temp_min = current_weather$main$temp_min,\n                       weather.temp_max = current_weather$main$temp_max,\n                       weather.pressure = current_weather$main$pressure,\n                       weather.humidity = current_weather$main$humidity,\n                       wind.speed = current_weather$wind$speed,\n                       wind.degree = current_weather$wind$deg)\n\n\n\n\n\nweather_data"
+  },
+  {
+    "objectID": "content/01_journal/02_data_acquisition.html#load-libraries-1",
+    "href": "content/01_journal/02_data_acquisition.html#load-libraries-1",
+    "title": "Data Acquisition",
+    "section": "2.1 Load libraries",
+    "text": "2.1 Load libraries\n\nlibrary(tidyverse)\n\n#> -- Attaching core tidyverse packages ------------------------ tidyverse 2.0.0 --\n#> v dplyr     1.1.2     v purrr     1.0.1\n#> v forcats   1.0.0     v readr     2.1.4\n#> v ggplot2   3.4.2     v stringr   1.5.0\n#> v lubridate 1.9.2     v tidyr     1.3.0-- Conflicts ------------------------------------------ tidyverse_conflicts() --\n#> x dplyr::filter() masks stats::filter()\n#> x dplyr::lag()    masks stats::lag()\n#> i Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors\n\nlibrary(glue)\nlibrary(rvest)\n\n#> \n#> Attaching package: 'rvest'\n#> \n#> The following object is masked from 'package:readr':\n#> \n#>     guess_encoding"
+  },
+  {
+    "objectID": "content/01_journal/02_data_acquisition.html#get-bike-category-links",
+    "href": "content/01_journal/02_data_acquisition.html#get-bike-category-links",
+    "title": "Data Acquisition",
+    "section": "2.2 Get bike category links",
+    "text": "2.2 Get bike category links\n\nurl_home <- \"https://www.rosebikes.de/fahrräder\"\nhtml_home <- read_html(url_home)\n\nbike_cats <- html_home %>%\n  html_nodes(css = \".catalog-navigation__link\")\n\nlinks <- sapply(bike_cats, function(x) {x %>% html_attr(\"href\")})\n\nlinks <- links[1:9] %>%\n  enframe(name = \"position\", value = \"subdirectory\") %>%\n  mutate(\n    url = glue(\"https://www.rosebikes.de{subdirectory}\"))  %>%\n  distinct(url)"
+  },
+  {
+    "objectID": "content/01_journal/02_data_acquisition.html#define-function-to-scrape-relevant-data-points",
+    "href": "content/01_journal/02_data_acquisition.html#define-function-to-scrape-relevant-data-points",
+    "title": "Data Acquisition",
+    "section": "2.3 Define function to scrape relevant data points",
+    "text": "2.3 Define function to scrape relevant data points\n\nget_data <- function(url) {\n  html_bike_cat <- read_html(url)\n  \n  listings <- html_nodes(html_bike_cat, css = '.catalog-category-bikes__price-title') %>% \n    html_text(trim=TRUE) %>%              \n    str_replace_all(\" \",\"\") %>%\n    str_replace_all(\"ab\", \"\") %>%\n    str_replace_all(\"€\", \"\") %>%\n    str_replace_all(\"\\n\", \"\") %>%\n    str_replace_all(\"\\\\.\", \"\") %>%\n    str_replace_all(\",\", \"\\\\.\") %>%\n    iconv('utf-8', 'ascii', sub='') %>%\n    as.numeric()\n  \n  names <- html_nodes(html_bike_cat, xpath = '//basic-headline/h4') %>% \n    html_text() %>%\n    str_replace_all(\"\\n\", \"\") %>%\n    str_to_title()\n  \n  categories <- rep(url %>% str_replace_all(\"https://www.rosebikes.de/fahrräder/\", \"\"), \n              each=length(names)) %>%\n    str_to_title()\n  \n  return(list(\"listings\" = listings, \"names\" = names, \"categories\" = categories))\n}"
+  },
+  {
+    "objectID": "content/01_journal/02_data_acquisition.html#create-table-from-relevant-data-points-1",
+    "href": "content/01_journal/02_data_acquisition.html#create-table-from-relevant-data-points-1",
+    "title": "Data Acquisition",
+    "section": "2.4 Create table from relevant data points",
+    "text": "2.4 Create table from relevant data points\n\ndata <- get_data(links$url[1])\n\nbike_data <- tibble(bike.type = data$categories,\n                    bike.name = data$names,\n                    bike.price = as.numeric(data$listings))\n\nfor (i in 2:9) {\n  data <- get_data(links$url[i])\n  \n  bike_data <- bike_data %>% add_row(bike.type = data$categories,\n                                     bike.name = data$names,\n                                     bike.price = as.numeric(data$listings))\n}"
+  },
+  {
+    "objectID": "content/01_journal/02_data_acquisition.html#display-table-1",
+    "href": "content/01_journal/02_data_acquisition.html#display-table-1",
+    "title": "Data Acquisition",
+    "section": "2.5 Display table",
+    "text": "2.5 Display table\n\nhead(bike_data, 10)"
+  },
+  {
+    "objectID": "content/01_journal/03_data_wrangling.html",
+    "href": "content/01_journal/03_data_wrangling.html",
+    "title": "Data Wrangling",
+    "section": "",
+    "text": "library(tidyverse)\n\n#> -- Attaching core tidyverse packages ------------------------ tidyverse 2.0.0 --\n#> v dplyr     1.1.2     v readr     2.1.4\n#> v forcats   1.0.0     v stringr   1.5.0\n#> v ggplot2   3.4.2     v tibble    3.2.1\n#> v lubridate 1.9.2     v tidyr     1.3.0\n#> v purrr     1.0.1     -- Conflicts ------------------------------------------ tidyverse_conflicts() --\n#> x dplyr::between()         masks data.table::between()\n#> x readr::col_character()   masks vroom::col_character()\n#> x readr::col_date()        masks vroom::col_date()\n#> x readr::col_datetime()    masks vroom::col_datetime()\n#> x readr::col_double()      masks vroom::col_double()\n#> x readr::col_factor()      masks vroom::col_factor()\n#> x readr::col_guess()       masks vroom::col_guess()\n#> x readr::col_integer()     masks vroom::col_integer()\n#> x readr::col_logical()     masks vroom::col_logical()\n#> x readr::col_number()      masks vroom::col_number()\n#> x readr::col_skip()        masks vroom::col_skip()\n#> x readr::col_time()        masks vroom::col_time()\n#> x readr::cols()            masks vroom::cols()\n#> x readr::date_names_lang() masks vroom::date_names_lang()\n#> x readr::default_locale()  masks vroom::default_locale()\n#> x dplyr::filter()          masks stats::filter()\n#> x dplyr::first()           masks data.table::first()\n#> x readr::fwf_cols()        masks vroom::fwf_cols()\n#> x readr::fwf_empty()       masks vroom::fwf_empty()\n#> x readr::fwf_positions()   masks vroom::fwf_positions()\n#> x readr::fwf_widths()      masks vroom::fwf_widths()\n#> x lubridate::hour()        masks data.table::hour()\n#> x lubridate::isoweek()     masks data.table::isoweek()\n#> x dplyr::lag()             masks stats::lag()\n#> x dplyr::last()            masks data.table::last()\n#> x readr::locale()          masks vroom::locale()\n#> x lubridate::mday()        masks data.table::mday()\n#> x lubridate::minute()      masks data.table::minute()\n#> x lubridate::month()       masks data.table::month()\n#> x readr::output_column()   masks vroom::output_column()\n#> x readr::problems()        masks vroom::problems()\n#> x lubridate::quarter()     masks data.table::quarter()\n#> x lubridate::second()      masks data.table::second()\n#> x purrr::transpose()       masks data.table::transpose()\n#> x lubridate::wday()        masks data.table::wday()\n#> x lubridate::week()        masks data.table::week()\n#> x lubridate::yday()        masks data.table::yday()\n#> x lubridate::year()        masks data.table::year()\n#> i Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors\n\nlibrary(vroom)\nlibrary(data.table)\n\n\n\n\n\ncol_types <- list(\n  id = col_character(),\n  type = col_character(),\n  number = col_character(),\n  country = col_character(),\n  date = col_date(\"%Y-%m-%d\"),\n  abstract = col_character(),\n  title = col_character(),\n  kind = col_character(),\n  num_claims = col_double(),\n  filename = col_character(),\n  withdrawn = col_double()\n)\n\n\n\n\n\npatent_tb1 <- vroom(\n  file       = '../../Patent_data_reduced/patent.tsv', \n  delim      = \"\\t\", \n  col_types  = col_types,\n  na         = c(\"\", \"NA\", \"NULL\")\n)\n\n#> Warning: The following named parsers don't match the column names: type, number,\n#> country, abstract, title, kind, filename, withdrawn\n\nassignee_tb1 <- vroom(\n  file       = '../../Patent_data_reduced/assignee.tsv', \n  delim      = \"\\t\", \n  col_types  = col_types,\n  na         = c(\"\", \"NA\", \"NULL\")\n)\n\n#> Warning: The following named parsers don't match the column names: number,\n#> country, date, abstract, title, kind, num_claims, filename, withdrawn\n\npatent_assignee_tb1 <- vroom(\n  file       = '../../Patent_data_reduced/patent_assignee.tsv', \n  delim      = \"\\t\", \n  col_types  = col_types,\n  na         = c(\"\", \"NA\", \"NULL\"))\n\n#> Warning: The following named parsers don't match the column names: id, type,\n#> number, country, date, abstract, title, kind, num_claims, filename, withdrawn\n\nuspc_tb1 <- vroom(\n  file       = '../../Patent_data_reduced/uspc.tsv', \n  delim      = \"\\t\", \n  col_types  = col_types,\n  na         = c(\"\", \"NA\", \"NULL\")) %>%\n  transform(patent_id = as.character(patent_id))\n\n#> Warning: The following named parsers don't match the column names: id, type,\n#> number, country, date, abstract, title, kind, num_claims, filename, withdrawn\n\n\n\n\n\n\nwrangled <- assignee_tb1 %>%\n  left_join(patent_assignee_tb1, by = c(\"id\" = \"assignee_id\")) %>%\n  left_join(patent_tb1, by = c(\"patent_id\" = \"id\")) %>%\n  left_join(uspc_tb1, by = \"patent_id\")\n\n#> Warning in left_join(., uspc_tb1, by = \"patent_id\"): Detected an unexpected\n#> many-to-many relationship between `x` and `y`."
+  },
+  {
+    "objectID": "content/01_journal/03_data_wrangling.html#get-patent-leaders",
+    "href": "content/01_journal/03_data_wrangling.html#get-patent-leaders",
+    "title": "Data Wrangling",
+    "section": "2.1 Get patent leaders",
+    "text": "2.1 Get patent leaders\n\npatent_leaders <- sort(table(wrangled$organization), decreasing=T)[1:10] %>%\n  as.data.frame() %>%\n  mutate(Var1 = Var1 %>% str_to_title())"
+  },
+  {
+    "objectID": "content/01_journal/03_data_wrangling.html#display-patent-leaders-in-table",
+    "href": "content/01_journal/03_data_wrangling.html#display-patent-leaders-in-table",
+    "title": "Data Wrangling",
+    "section": "2.2 Display patent leaders in table",
+    "text": "2.2 Display patent leaders in table\n\ndata.table(\n  \"Organization\" = patent_leaders$Var1,\n  \"No. of patents (2014)\" = patent_leaders$Freq)"
+  },
+  {
+    "objectID": "content/01_journal/03_data_wrangling.html#get-august-wrangled-table",
+    "href": "content/01_journal/03_data_wrangling.html#get-august-wrangled-table",
+    "title": "Data Wrangling",
+    "section": "3.1 Get August wrangled table",
+    "text": "3.1 Get August wrangled table\n\nwrangled_august <- wrangled %>% \n  select(organization, date) %>%\n  filter(date >= \"2014-08-01\" & date <= \"2014-08-31\")"
+  },
+  {
+    "objectID": "content/01_journal/03_data_wrangling.html#get-august-patent-leaders",
+    "href": "content/01_journal/03_data_wrangling.html#get-august-patent-leaders",
+    "title": "Data Wrangling",
+    "section": "3.2 Get August patent leaders",
+    "text": "3.2 Get August patent leaders\n\npatent_leaders_august <- sort(table(wrangled_august$organization), decreasing=T)[1:10] %>%\n  as.data.frame() %>%\n  mutate(Var1 = Var1 %>% str_to_title())"
+  },
+  {
+    "objectID": "content/01_journal/03_data_wrangling.html#display-august-patent-leaders-in-table",
+    "href": "content/01_journal/03_data_wrangling.html#display-august-patent-leaders-in-table",
+    "title": "Data Wrangling",
+    "section": "3.3 Display August patent leaders in table",
+    "text": "3.3 Display August patent leaders in table\n\ndata.table(\n  \"Organization\" = patent_leaders_august$Var1,\n  \"No. of patents (August 2014)\" = patent_leaders_august$Freq)"
+  },
+  {
+    "objectID": "content/01_journal/03_data_wrangling.html#get-class-wrangled-table",
+    "href": "content/01_journal/03_data_wrangling.html#get-class-wrangled-table",
+    "title": "Data Wrangling",
+    "section": "4.1 Get class wrangled table",
+    "text": "4.1 Get class wrangled table\n\nwrangled_class <- wrangled %>%\n  select(organization, mainclass_id) %>%\n  filter(organization %in% patent_leaders$Var1[1:10]) %>% \n  subset(mainclass_id != \"No longer published\")"
+  },
+  {
+    "objectID": "content/01_journal/03_data_wrangling.html#get-class-patent-leaders",
+    "href": "content/01_journal/03_data_wrangling.html#get-class-patent-leaders",
+    "title": "Data Wrangling",
+    "section": "4.2 Get class patent leaders",
+    "text": "4.2 Get class patent leaders\n\nclass_leaders <- sort(table(wrangled_class$mainclass_id), decreasing=T)[1:5] %>% \n  as.data.frame() %>%\n  mutate(Var1 = Var1 %>% str_to_title())"
+  },
+  {
+    "objectID": "content/01_journal/03_data_wrangling.html#display-class-patent-leaders-in-table",
+    "href": "content/01_journal/03_data_wrangling.html#display-class-patent-leaders-in-table",
+    "title": "Data Wrangling",
+    "section": "4.3 Display class patent leaders in table",
+    "text": "4.3 Display class patent leaders in table\n\ndata.table(\n  \"USPTO tech main class (id since can't find name) for top 10 companies (US since can't find worldwide)\" = class_leaders$Var1,\n  \"No. of patents (2014)\" = class_leaders$Freq)"
+  },
+  {
+    "objectID": "content/01_journal/04_data_visualization.html",
+    "href": "content/01_journal/04_data_visualization.html",
+    "title": "Data Visualization",
+    "section": "",
+    "text": "library(tidyverse)\n\n#> -- Attaching core tidyverse packages ------------------------ tidyverse 2.0.0 --\n#> v dplyr     1.1.2     v readr     2.1.4\n#> v forcats   1.0.0     v stringr   1.5.0\n#> v ggplot2   3.4.2     v tibble    3.2.1\n#> v lubridate 1.9.2     v tidyr     1.3.0\n#> v purrr     1.0.1     -- Conflicts ------------------------------------------ tidyverse_conflicts() --\n#> x dplyr::filter() masks stats::filter()\n#> x dplyr::lag()    masks stats::lag()\n#> i Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors\n\nlibrary(ggplot2)\nlibrary(scales)\n\n#> \n#> Attaching package: 'scales'\n#> \n#> The following object is masked from 'package:purrr':\n#> \n#>     discard\n#> \n#> The following object is masked from 'package:readr':\n#> \n#>     col_factor\n\nlibrary(ggrepel)\nlibrary(glue)\n\n\n\n\n\ncovid_data_tbl <- read_csv(\"https://covid.ourworldindata.org/data/owid-covid-data.csv\")\n\n#> Rows: 304399 Columns: 67-- Column specification --------------------------------------------------------\n#> Delimiter: \",\"\n#> chr   (4): iso_code, continent, location, tests_units\n#> dbl  (62): total_cases, new_cases, new_cases_smoothed, total_deaths, new_dea...\n#> date  (1): date\n#> i Use `spec()` to retrieve the full column specification for this data.\n#> i Specify the column types or set `show_col_types = FALSE` to quiet this message.\n\n\n\n\n\n\nworldwide_cases <- covid_data_tbl %>%\n  select(continent, date, total_cases) %>%\n  drop_na(continent) %>%\n  group_by(date, continent) %>%\n  summarise(Total = sum(total_cases, na.rm = TRUE))\n\n#> `summarise()` has grouped output by 'date'. You can override using the `.groups`\n#> argument.\n\ndata_max <- worldwide_cases %>% \n  group_by(continent) %>%\n  filter(Total == max(Total))\n\nlast_date <- as.character(tail(worldwide_cases, n=1)$date)\n\n\n\n\n\nworldwide_cases %>% ggplot(aes(as.Date(date), Total, color = continent)) +\n  geom_line(linewidth = 1) +\n  theme_linedraw() +\n  scale_x_date(date_labels = \"%B %y\", \n               date_breaks = \"1 month\", \n               expand = c(0,NA)) +\n  labs(\n    title = \"COVID-19 confirmed cases worldwide\",\n    subtitle = glue(\"As of {last_date}\")\n  ) +\n  xlab(\"Date\") + ylab(\"Cumulative Cases\") +\n  scale_y_continuous(labels = label_number(suffix = \" M\", scale = 1e-6)) +\n  theme(legend.title = element_blank(), \n        legend.position = \"bottom\", \n        axis.text.x = element_text(angle = 45, hjust = 1))"
+  },
+  {
+    "objectID": "content/01_journal/04_data_visualization.html#load-world-map",
+    "href": "content/01_journal/04_data_visualization.html#load-world-map",
+    "title": "Data Visualization",
+    "section": "2.1 Load world map",
+    "text": "2.1 Load world map\n\nworld <- map_data(\"world\")\n\nworldwide_mortality <- covid_data_tbl %>%\n  select(location, date, total_deaths, population) %>%\n  drop_na(location) %>%\n  mutate(location = case_when(\n    location == \"United Kingdom\" ~ \"UK\",\n    location == \"United States\" ~ \"USA\",\n    location == \"Democratic Republic of Congo\" ~ \"Democratic Republic of the Congo\",\n    TRUE ~ location )) %>% \n  distinct() %>%\n  group_by(location) %>% \n  filter(date == max(date)) %>%\n  mutate(death_rate = total_deaths / population) %>%\n  rename(region = location) %>%\n  left_join(world, by = \"region\")"
+  },
+  {
+    "objectID": "content/01_journal/04_data_visualization.html#plot-worldwide-mortality",
+    "href": "content/01_journal/04_data_visualization.html#plot-worldwide-mortality",
+    "title": "Data Visualization",
+    "section": "2.2 Plot worldwide mortality",
+    "text": "2.2 Plot worldwide mortality\n\nworldwide_mortality %>% ggplot(aes(x = long, y = lat, group = group)) + \n  geom_polygon(aes(fill = death_rate), color = \"white\") +\n  labs(\n    title = \"Mortality Rate Around the World (deaths / population)\",\n    subtitle = \"Around 6.9 Million confirmed COVID-19 deaths worldwide\",\n    fill = \"Mortality Rate\"\n  ) +\n  theme(axis.line = element_blank(), axis.text = element_blank(),\n        axis.ticks = element_blank(), axis.title = element_blank()) +\n  scale_fill_gradientn(na.value=\"gray\",\n                       colors = rev(colorRampPalette(c(\"darkred\", \"lightcoral\"))(5)))"
+  },
+  {
     "objectID": "content/03_other/06_links.html",
     "href": "content/03_other/06_links.html",
     "title": "Links",
@@ -7,59 +140,10 @@
     "text": "R is a free open-source programming language that can be used for statistical analysis, data-simulation, graphing, and lots of other stuff. Another free program is R-studio, that provides a nice graphic interface for R. Download R first, then download R-studio. Both can run on PCs, Macs or Linux. Students will be learning R in the stats labs using the lab manual .\n\n\n\n\nGoogle is great, Google your problem\nStackoverflow is great, google will often take you there because someone has already asked your question, and someone else has answered, usually many people have answered your question many ways."
   },
   {
-    "objectID": "content/01_journal/03_data_wrangling.html",
-    "href": "content/01_journal/03_data_wrangling.html",
-    "title": "Data Wrangling",
-    "section": "",
-    "text": "Note\n\n\n\nYou can delete everything in here and start fresh."
-  },
-  {
-    "objectID": "content/01_journal/04_data_visualization.html",
-    "href": "content/01_journal/04_data_visualization.html",
-    "title": "Data Visualization",
-    "section": "",
-    "text": "Note\n\n\n\nYou can delete everything in here and start fresh."
-  },
-  {
-    "objectID": "content/01_journal/01_tidyverse.html",
-    "href": "content/01_journal/01_tidyverse.html",
-    "title": "Tidyverse",
-    "section": "",
-    "text": "Note\n\n\n\nYou can delete everything in here and start fresh.\nThis is a .qmd file. It is plain text with special features. Any time you write just like this, it will be compiled to normal text in the website. If you put a # in front of your text, it will create a top level-header.\nTo learn more about Quarto websites visit https://quarto.org/docs/websites."
-  },
-  {
-    "objectID": "content/01_journal/01_tidyverse.html#header-2",
-    "href": "content/01_journal/01_tidyverse.html#header-2",
-    "title": "Tidyverse",
-    "section": "\n2.1 Header 2",
-    "text": "2.1 Header 2\nHeader 3\nHeader 4\nHeader 5\nHeader 6"
-  },
-  {
-    "objectID": "content/01_journal/02_data_acquisition.html",
-    "href": "content/01_journal/02_data_acquisition.html",
-    "title": "Data Acquisition",
-    "section": "",
-    "text": "Note\n\n\n\nYou can delete everything in here and start fresh."
-  },
-  {
-    "objectID": "content/02_notes/05_class_notes.html",
-    "href": "content/02_notes/05_class_notes.html",
-    "title": "Class Notes",
-    "section": "",
-    "text": "IMPORTANT: You can delete everything in here and start fresh. You might want to start by not deleting anything above this line until you know what that stuff is doing.\nThis is an .qmd file. It is plain text with special features. Any time you write just like this, it will be compiled to normal text in the website. If you put a # in front of your text, it will create a top level-header."
-  },
-  {
-    "objectID": "index.html",
-    "href": "index.html",
+    "objectID": "index.html#welcome-to-my-journal",
+    "href": "index.html#welcome-to-my-journal",
     "title": "My Lab Journal",
-    "section": "",
-    "text": "This is a template example for lab journaling. Students in the data science courses at the Institute of Entrepreneurship will use this template to learn R for business analytics. Students can replace this text as they wish."
-  },
-  {
-    "objectID": "index.html#how-to-use",
-    "href": "index.html#how-to-use",
-    "title": "My Lab Journal",
-    "section": "How to use",
-    "text": "How to use\n\nAccept the assignment and get your own github repo.\nBlog/journal what you are doing in R, by editing the .qmd files.\nSee the links page for lots of helpful links on learning R.\nChange everything to make it your own.\nMake sure to render you website everytime before you want to upload changes"
+    "section": "Welcome to my journal!",
+    "text": "Welcome to my journal!"
   }
 ]
