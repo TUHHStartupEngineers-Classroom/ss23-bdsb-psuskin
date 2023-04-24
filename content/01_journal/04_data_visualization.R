@@ -1,26 +1,13 @@
----
-title: "Data Visualization"
-author: "Philip Suskin"
----
-
-# Solution
-
-## Load libraries
-```{r}
 library(tidyverse)
 library(ggplot2)
 library(scales)
 library(ggrepel)
 library(glue)
-```
 
-## Load covid data
-```{r}
 covid_data_tbl <- read_csv("https://covid.ourworldindata.org/data/owid-covid-data.csv")
-```
 
-## Get worldwide cases and relevant data
-```{r}
+# Challenge 1
+
 worldwide_cases <- covid_data_tbl %>%
   select(continent, date, total_cases) %>%
   drop_na(continent) %>%
@@ -32,10 +19,7 @@ data_max <- worldwide_cases %>%
   filter(Total == max(Total))
 
 last_date <- as.character(tail(worldwide_cases, n=1)$date)
-```
 
-## Plot worldwide cases over time
-```{r plot, fig.width=12, fig.height=8}
 worldwide_cases %>% ggplot(aes(as.Date(date), Total, color = continent)) +
   geom_line(linewidth = 1) +
   theme_linedraw() +
@@ -51,12 +35,9 @@ worldwide_cases %>% ggplot(aes(as.Date(date), Total, color = continent)) +
   theme(legend.title = element_blank(), 
         legend.position = "bottom", 
         axis.text.x = element_text(angle = 45, hjust = 1))
-```
 
-# Solution challenge 2
+# Challenge 2
 
-## Load world map
-```{r}
 world <- map_data("world")
 
 worldwide_mortality <- covid_data_tbl %>%
@@ -73,10 +54,7 @@ worldwide_mortality <- covid_data_tbl %>%
   mutate(death_rate = total_deaths / population) %>%
   rename(region = location) %>%
   left_join(world, by = "region")
-```
 
-## Plot worldwide mortality
-```{r plot2, fig.width=12, fig.height=8}
 worldwide_mortality %>% ggplot(aes(x = long, y = lat, group = group)) + 
   geom_polygon(aes(fill = death_rate), color = "white") +
   labs(
@@ -88,4 +66,3 @@ worldwide_mortality %>% ggplot(aes(x = long, y = lat, group = group)) +
         axis.ticks = element_blank(), axis.title = element_blank()) +
   scale_fill_gradientn(na.value="gray",
                        colors = rev(colorRampPalette(c("darkred", "lightcoral"))(5)))
-```
